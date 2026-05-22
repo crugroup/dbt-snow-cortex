@@ -1,0 +1,16 @@
+name: 'dbt_snow_cortex_integration_tests'
+version: '0.1.0'
+
+profile: 'integration_tests'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  dbt_snow_cortex_integration_tests:
+    +materialized: table

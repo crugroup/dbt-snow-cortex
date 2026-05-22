@@ -1,0 +1,6 @@
+[tool.sqlfluff.core]
+dialect = "snowflake"
+max_line_length = 120
+
+[tool.sqlfluff.indentation]
+tab_space_size = 2

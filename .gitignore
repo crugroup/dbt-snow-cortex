@@ -1,0 +1,33 @@
+# Python bytecode and caches
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Python environments
+.env
+.envrc
+.venv/
+env/
+venv/
+ENV/
+
+# Packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# dbt generated artifacts
+target/
+dbt_packages/
+logs/
+integration_tests/logs/
+profiles.yml
+
+# OS/editor noise
+.DS_Store
+tempCodeRunnerFile.py

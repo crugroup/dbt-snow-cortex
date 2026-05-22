@@ -1,0 +1,23 @@
+models:
+  - name: sample_search_model
+    description: >
+      Sample model used to verify that create_cortex_search_service runs without error
+      and the service is created in Snowflake.
+    config:
+      post_hook:
+        - "{{ dbt_snow_cortex.create_cortex_search_service(
+                search_column='DESCRIPTION',
+                primary_key_columns=['ID'],
+                attribute_columns=['COMMODITY_NAME', 'DATA_DATE'],
+                source_query_casts={'DATA_DATE': 'VARCHAR'},
+                warehouse='COMPUTE_WH',
+                target_lag='1 hour') }}"
+    columns:
+      - name: id
+        description: Unique identifier for each sample row.
+      - name: description
+        description: Full-text column that Cortex Search indexes.
+      - name: commodity_name
+        description: Filterable attribute — commodity the description relates to.
+      - name: data_date
+        description: Date of the record.

@@ -1,0 +1,30 @@
+# Example profiles.yml for running integration tests.
+# Copy to ~/.dbt/profiles.yml and replace placeholders.
+
+integration_tests:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: YOUR_SNOWFLAKE_ACCOUNT  # e.g. abc12345.us-east-1
+      user: YOUR_USERNAME
+      password: YOUR_PASSWORD
+      role: YOUR_ROLE                  # needs CREATE CORTEX SEARCH SERVICE + semantic view procedure rights
+      database: YOUR_DATABASE
+      warehouse: YOUR_WAREHOUSE
+      schema: dbt_snow_cortex_tests
+      threads: 4
+
+# Recommended for CI — use environment variables:
+# integration_tests:
+#   target: dev
+#   outputs:
+#     dev:
+#       type: snowflake
+#       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+#       user: "{{ env_var('SNOWFLAKE_USER') }}"
+#       password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+#       role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+#       database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+#       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+#       schema: dbt_snow_cortex_tests
