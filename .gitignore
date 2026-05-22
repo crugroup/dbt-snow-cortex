@@ -31,3 +31,4 @@ profiles.yml
 # OS/editor noise
 .DS_Store
 tempCodeRunnerFile.py
+package-lock.yml
