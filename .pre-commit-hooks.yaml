@@ -1,0 +1,6 @@
+- id: semantic-view-yaml-sync
+  name: Sync semantic YAML into dbt macro
+  description: Generate or validate inline semantic-view YAML macro from a source YAML file.
+  entry: scripts/sync_semantic_view_yaml.py
+  language: python
+  pass_filenames: false

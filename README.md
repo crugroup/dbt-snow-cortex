@@ -23,6 +23,7 @@ This package is intended to be reused across data products as a common Cortex la
 ### Semantic view deployment
 
 - `create_or_replace_semantic_view`: deploy semantic view from inline YAML content
+- `semantic-view-yaml-sync` pre-commit hook: keep source YAML and inline macro payload in sync
 
 ### Operations / verification
 
@@ -121,6 +122,30 @@ dbt run-operation dbt_snow_cortex.create_or_replace_semantic_view \
   }'
 ```
 
+### 3a) Generic semantic YAML sync (pre-commit / CI)
+
+This package ships a reusable pre-commit hook that generates or validates inline
+semantic-view payload macros from a YAML source file.
+
+Example in a consumer repository:
+
+```yaml
+repos:
+  - repo: ../../dbt-snow-cortex
+    rev: HEAD
+    hooks:
+      - id: semantic-view-yaml-sync
+        args:
+          - --yaml-path
+          - dbt/semantic_views/semantic_view_asset_platform.yaml
+          - --macro-path
+          - dbt/macros/semantic_view_asset_platform_yaml.sql
+          - --macro-name
+          - asset_platform_semantic_view_yaml
+```
+
+For CI drift checks, append `--check` to the hook args.
+
 ### 4) Runtime inspection commands
 
 ```bash
@@ -201,6 +226,7 @@ Profile template: `integration_tests/profiles.yml.example`
 ## Operational Notes for Data Products
 
 - Keep semantic YAML human-readable in your product repo and pass it inline to this package macro.
+- Prefer YAML-as-source-of-truth and generate inline macro payloads using the sync hook.
 - Prefer explicit, fully-qualified object names in production (`DB.SCHEMA.OBJECT`).
 - Use dedicated compute warehouse for Cortex objects to avoid contention with transformation runs.
 - Run listing macros in post-deploy checks (or orchestrator validation tasks).
