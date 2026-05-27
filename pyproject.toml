@@ -8,9 +8,12 @@ version = "0.1.0"
 description = "Pre-commit hook support files for dbt-snow-cortex"
 requires-python = ">=3.9"
 
+[project.scripts]
+semantic-view-yaml-sync = "sync_semantic_view_yaml:main"
+
 [tool.setuptools]
 packages = []
-py-modules = []
+py-modules = ["sync_semantic_view_yaml"]
 
 [tool.sqlfluff.core]
 dialect = "snowflake"
