@@ -17,8 +17,8 @@ This package is intended to be reused across data products as a common Cortex la
 
 ### Search service deployment
 
-- `create_cortex_search_service`: create/replace search service from a model post-hook
-- `apply_cortex_search_config`: zero-arg post-hook that reads `config.meta.cortex_search`
+- `create_cortex_search_service`: create/replace search service from a model post-hook (direct call)
+- `apply_cortex_search_config`: zero-arg post-hook that reads `config.meta.cortex_search` (preferred)
 
 ### Semantic view deployment
 
@@ -65,9 +65,33 @@ The executing role needs privileges to:
 
 ## Key Usage Patterns
 
-### 1) Model post-hook for Cortex Search Service
+### 1) Model post-hook for Cortex Search Service (preferred)
 
-Attach to model config where search index should be built.
+Declare services via `meta.cortex_search` as a list. The same post-hook line
+works on any model — models without `cortex_search` are silently skipped.
+
+```yaml
+models:
+  - name: mart_example
+    config:
+      meta:
+        cortex_search:
+          - service_name: ANALYTICS_DB.CORTEX.CSS_PRODUCT_SEARCH
+            search_column: DESCRIPTION
+            primary_key_columns: [RECORD_ID, EVENT_DATE]
+            attribute_columns: [COUNTRY, CATEGORY]
+            source_query_casts: {EVENT_DATE: VARCHAR}
+          - service_name: ANALYTICS_DB.CORTEX.CSS_PRODUCT_META
+            search_column: PRODUCT_NAME
+            attribute_columns: [CATEGORY, PRICE_BAND]
+      post_hook:
+        - "{{ dbt_snow_cortex.apply_cortex_search_config() }}"
+```
+
+### 2) Direct `create_cortex_search_service` call (alternative)
+
+For cases where the meta-based config is not suitable, call
+`create_cortex_search_service` directly in the post_hook:
 
 ```yaml
 models:
@@ -83,28 +107,6 @@ models:
                 warehouse='COMPUTE_WH',
                 target_lag='1 hour',
                 refresh_mode='INCREMENTAL') }}"
-```
-
-### 2) Cleaner model config with `meta` + zero-arg hook
-
-Prefer this when multiple models use Cortex Search and you want less noisy hooks.
-
-```yaml
-models:
-  - name: mart_example
-    config:
-      meta:
-        cortex_search:
-          service_name: ANALYTICS_DB.CORTEX.CSS_MART_EXAMPLE
-          search_column: DESCRIPTION
-          primary_key_columns: [ID]
-          attribute_columns: [COUNTRY, CATEGORY]
-          source_query_casts: {DATA_DATE: VARCHAR}
-          warehouse: WAREHOUSE__DBT
-          target_lag: '1 hour'
-          refresh_mode: INCREMENTAL
-      post_hook:
-        - "{{ dbt_snow_cortex.apply_cortex_search_config() }}"
 ```
 
 ### 3) Semantic view deployment from YAML (run-operation)

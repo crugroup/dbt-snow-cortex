@@ -126,20 +126,23 @@
 {% macro apply_cortex_search_config() %}
   {#
     Zero-argument post_hook companion to create_cortex_search_service.
-    Reads all Cortex Search parameters from the model's `meta.cortex_search` block,
-    so the hook call in YAML is a single clean line.
+    Reads Cortex Search parameters from the model's `meta.cortex_search` block.
+
+    When cortex_search contains a list, iterates over each entry to create
+    all services from a single post-hook call. When a single dict, creates
+    one service (backward compatible).
+
+    Missing or empty cortex_search is a no-op (safe to add to any model).
 
     Usage in model YAML:
         config:
           meta:
             cortex_search:
-              service_name: 'DB.SCHEMA.CSS_NAME'
-              search_column: 'MY_TEXT_COL'
-              primary_key_columns: [ID]
-              attribute_columns: [A, B]
-              source_query_casts: {DATE_COL: VARCHAR}
-              warehouse: WAREHOUSE__DBT
-              target_lag: '1 hour'
+              - service_name: DB.SCHEMA.CSS_A
+                search_column: COL_A
+                attribute_columns: [X, Y]
+              - service_name: DB.SCHEMA.CSS_B
+                search_column: COL_B
           post_hook:
             - "{{ dbt_snow_cortex.apply_cortex_search_config() }}"
   #}
@@ -147,20 +150,32 @@
 {% set node = graph.nodes[this.unique_id] %}
 {% set cs = node.config.meta.get('cortex_search') %}
 {% if cs is none %}
-      {{ exceptions.raise_compiler_error(
-        "dbt_snow_cortex.apply_cortex_search_config: no 'cortex_search' found in config.meta on model " ~ this
-      ) }}
+  {% do return('') %}
 {% endif %}
-    {{ return(dbt_snow_cortex.create_cortex_search_service(
-      service_name=cs.get('service_name'),
-      search_column=cs.get('search_column'),
-      primary_key_columns=cs.get('primary_key_columns', []),
-      attribute_columns=cs.get('attribute_columns', []),
-      source_query=cs.get('source_query'),
-      source_query_casts=cs.get('source_query_casts', {}),
-      warehouse=cs.get('warehouse', 'COMPUTE_WH'),
-      target_lag=cs.get('target_lag', '1 hour'),
-      refresh_mode=cs.get('refresh_mode', 'INCREMENTAL')
-    )) }}
+
+{# Normalise single dict or list to list #}
+{% if cs is mapping %}
+  {% set configs = [cs] %}
+{% else %}
+  {% set configs = cs %}
+{% endif %}
+
+{% set statements = [] %}
+{% for config in configs %}
+  {% do statements.append(
+    dbt_snow_cortex.create_cortex_search_service(
+      service_name=config.get('service_name'),
+      search_column=config.get('search_column'),
+      primary_key_columns=config.get('primary_key_columns', []),
+      attribute_columns=config.get('attribute_columns', []),
+      source_query=config.get('source_query'),
+      source_query_casts=config.get('source_query_casts', {}),
+      warehouse=config.get('warehouse', 'COMPUTE_WH'),
+      target_lag=config.get('target_lag', '1 hour'),
+      refresh_mode=config.get('refresh_mode', 'INCREMENTAL')
+    )
+  ) }}
+{% endfor %}
+{{ return(statements | join('\n')) }}
 {% endif %}
 {% endmacro %}
