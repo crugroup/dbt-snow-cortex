@@ -140,7 +140,7 @@
       schema:          Target schema (default: target.schema).
       search_column:   Column to full-text index (required).
       attribute_columns, source_query, source_query_casts, warehouse,
-      target_lag, refresh_mode: see create_cortex_search_service.
+      target_lag, refresh_mode, grant_role: see create_cortex_search_service.
 
     Usage in model YAML:
         config:
@@ -205,6 +205,11 @@
       refresh_mode=config.get('refresh_mode', 'INCREMENTAL')
     )
   ) }}
+  {% if config.get('grant_role') %}
+    {% do service_statements.append(
+      'GRANT USAGE ON CORTEX SEARCH SERVICE ' ~ _full_name ~ ' TO ROLE ' ~ adapter.quote(config.get('grant_role'))
+    ) %}
+  {% endif %}
 {% endfor %}
 
 {{ return((schema_statements + service_statements) | join('\n')) }}

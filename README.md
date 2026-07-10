@@ -83,6 +83,7 @@ models:
             primary_key_columns: [RECORD_ID, EVENT_DATE]
             attribute_columns: [COUNTRY, CATEGORY]
             source_query_casts: {EVENT_DATE: VARCHAR}
+            grant_role: ROLE_AI_AGENT
           - service_name: CSS_PRODUCT_META
             search_column: PRODUCT_NAME
             attribute_columns: [CATEGORY, PRICE_BAND]
@@ -207,6 +208,7 @@ dbt run-operation dbt_snow_cortex.assert_cortex_deployment \
 | `warehouse` | No | `COMPUTE_WH` | Build/refresh warehouse |
 | `target_lag` | No | `1 hour` | Staleness target |
 | `refresh_mode` | No | `INCREMENTAL` | `INCREMENTAL` or `FULL` |
+| `grant_role` | No | none | Role to receive `USAGE` on the service after creation (also accepted by `apply_cortex_search_config`) |
 
 ### `create_or_replace_semantic_view`
 
