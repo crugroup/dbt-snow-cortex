@@ -25,7 +25,7 @@
       target_lag,
       warehouse,
       data_timestamp
-    FROM {{ _database }}.INFORMATION_SCHEMA.CORTEX_SEARCH_SERVICES
+    FROM {{ adapter.quote(_database) }}.INFORMATION_SCHEMA.CORTEX_SEARCH_SERVICES
     {% if schema is not none %}
     WHERE service_schema = '{{ schema | upper }}'
     {% endif %}
@@ -79,7 +79,7 @@
       schema,
       name,
       created
-    FROM {{ _database }}.INFORMATION_SCHEMA.SEMANTIC_VIEWS
+    FROM {{ adapter.quote(_database) }}.INFORMATION_SCHEMA.SEMANTIC_VIEWS
     {% if schema is not none %}
     WHERE schema = '{{ schema | upper }}'
     {% endif %}
@@ -140,7 +140,7 @@
     SELECT
       service_schema AS schema_name,
       service_name
-    FROM {{ _database }}.INFORMATION_SCHEMA.CORTEX_SEARCH_SERVICES
+    FROM {{ adapter.quote(_database) }}.INFORMATION_SCHEMA.CORTEX_SEARCH_SERVICES
     {% if schema is not none %}
     WHERE service_schema = '{{ schema | upper }}'
     {% endif %}
@@ -175,7 +175,7 @@
     SELECT
       schema AS schema_name,
       name AS semantic_view_name
-    FROM {{ _database }}.INFORMATION_SCHEMA.SEMANTIC_VIEWS
+    FROM {{ adapter.quote(_database) }}.INFORMATION_SCHEMA.SEMANTIC_VIEWS
     {% if schema is not none %}
     WHERE schema = '{{ schema | upper }}'
     {% endif %}

@@ -62,14 +62,17 @@
   {% endif %}
 
   {% set _database = database if database is not none else target.database %}
-  {% set _target_schema = _database ~ '.' ~ schema %}
+  {% set _q_db = adapter.quote(_database) %}
+  {% set _q_sch = adapter.quote(schema) %}
+  {% set _q_vn = adapter.quote(view_name) %}
+  {% set _target_schema = _q_db ~ '.' ~ _q_sch %}
 
   {% if execute %}
     {# Check whether the view already exists to honour replace=false #}
     {% if not replace %}
       {% set exists_query %}
         SELECT COUNT(*) AS cnt
-        FROM {{ _database }}.INFORMATION_SCHEMA.SEMANTIC_VIEWS
+        FROM {{ _q_db }}.INFORMATION_SCHEMA.SEMANTIC_VIEWS
         WHERE CATALOG = '{{ _database | upper }}'
           AND SCHEMA  = '{{ schema | upper }}'
           AND NAME    = '{{ view_name | upper }}'
@@ -87,7 +90,7 @@
     {% endif %}
 
     {{ log(
-      'dbt_snow_cortex: creating semantic view ' ~ view_name
+      'dbt_snow_cortex: creating semantic view ' ~ _q_vn
       ~ ' in ' ~ _target_schema,
       info=true
     ) }}
@@ -97,7 +100,7 @@
 
     {% set create_sql %}
       CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
-        '{{ _target_schema }}',
+        '{{ _q_db }}.{{ _q_sch }}.{{ _q_vn }}',
         $$
 {{ safe_yaml }}
         $$
@@ -106,7 +109,7 @@
 
     {% do run_query(create_sql) %}
     {{ log(
-      'dbt_snow_cortex: semantic view ' ~ view_name ~ ' created successfully in '
+      'dbt_snow_cortex: semantic view ' ~ _q_vn ~ ' created successfully in '
       ~ _target_schema ~ '.',
       info=true
     ) }}
