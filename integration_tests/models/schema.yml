@@ -6,7 +6,7 @@ models:
     config:
       meta:
         cortex_search:
-          - service_name: '{{ target.database }}.{{ target.schema }}.CSS_SAMPLE_SEARCH'
+          - service_name: CSS_SAMPLE_SEARCH
             search_column: DESCRIPTION
             primary_key_columns: [ID]
             attribute_columns: [COMMODITY_NAME, DATA_DATE]

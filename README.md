@@ -76,12 +76,14 @@ models:
     config:
       meta:
         cortex_search:
-          - service_name: ANALYTICS_DB.CORTEX.CSS_PRODUCT_SEARCH
+          - service_name: CSS_PRODUCT_SEARCH
+            database: ANALYTICS_DB
+            schema: CORTEX
             search_column: DESCRIPTION
             primary_key_columns: [RECORD_ID, EVENT_DATE]
             attribute_columns: [COUNTRY, CATEGORY]
             source_query_casts: {EVENT_DATE: VARCHAR}
-          - service_name: ANALYTICS_DB.CORTEX.CSS_PRODUCT_META
+          - service_name: CSS_PRODUCT_META
             search_column: PRODUCT_NAME
             attribute_columns: [CATEGORY, PRICE_BAND]
       post_hook:
@@ -194,7 +196,9 @@ dbt run-operation dbt_snow_cortex.assert_cortex_deployment \
 
 | Parameter | Required | Default | Notes |
 |---|---|---|---|
-| `service_name` | No | `<db>.<schema>.CSS_<model>` | Fully qualified object name |
+| `service_name` | Yes | model identifier | Short service name within the schema |
+| `database` | No | `target.database` | Database for the service |
+| `schema` | No | `target.schema` | Schema for the service |
 | `search_column` | Yes | n/a | Column used in `ON` clause |
 | `primary_key_columns` | No | `[]` | For incremental refresh primary key |
 | `attribute_columns` | No | `[]` | Filterable attributes |
