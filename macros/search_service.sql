@@ -157,7 +157,10 @@
             - "{{ dbt_snow_cortex.apply_cortex_search_config() }}"
   #}
 {% if execute %}
-{% set node = graph.nodes[this.unique_id] %}
+{% set node = graph.nodes.get(this.unique_id) %}
+{% if node is none %}
+  {% do return('') %}
+{% endif %}
 {% set cs = node.config.meta.get('cortex_search') %}
 {% if cs is none %}
   {% do return('') %}
