@@ -198,7 +198,7 @@
       target_lag=config.get('target_lag', '1 hour'),
       refresh_mode=config.get('refresh_mode', 'INCREMENTAL')
     )
-  ) }}
+  ) %}
 {% endfor %}
 
 {{ return(statements | join('\n')) }}
