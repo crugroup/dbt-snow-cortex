@@ -140,7 +140,7 @@
       schema:          Target schema (default: target.schema).
       search_column:   Column to full-text index (required).
       attribute_columns, source_query, source_query_casts, warehouse,
-      target_lag, refresh_mode, grant_role: see create_cortex_search_service.
+      target_lag, refresh_mode: see create_cortex_search_service.
 
     Usage in model YAML:
         config:
@@ -170,9 +170,7 @@
   {% set configs = cs %}
 {% endif %}
 
-{% set schema_statements = [] %}
-{% set service_statements = [] %}
-{% set seen_schemas = [] %}
+{% set statements = [] %}
 
 {% for config in configs %}
   {% set _database = config.get('database', this.database) %}
@@ -184,15 +182,11 @@
   {% set _q_db = adapter.quote(_database) %}
   {% set _q_sch = adapter.quote(_schema) %}
   {% set _q_name = adapter.quote(_service_name) %}
-  {% set _schema_ref = _q_db ~ '.' ~ _q_sch %}
   {% set _full_name = _q_db ~ '.' ~ _q_sch ~ '.' ~ _q_name %}
 
-  {% if _schema_ref not in seen_schemas %}
-    {% do seen_schemas.append(_schema_ref) %}
-    {% do schema_statements.append('CREATE SCHEMA IF NOT EXISTS ' ~ _schema_ref) %}
-  {% endif %}
+  {% do statements.append('CREATE SCHEMA IF NOT EXISTS ' ~ _q_db ~ '.' ~ _q_sch) %}
 
-  {% do service_statements.append(
+  {% do statements.append(
     dbt_snow_cortex.create_cortex_search_service(
       service_name=_full_name,
       search_column=config.get('search_column'),
@@ -205,13 +199,8 @@
       refresh_mode=config.get('refresh_mode', 'INCREMENTAL')
     )
   ) }}
-  {% if config.get('grant_role') %}
-    {% do service_statements.append(
-      'GRANT USAGE ON CORTEX SEARCH SERVICE ' ~ _full_name ~ ' TO ROLE ' ~ adapter.quote(config.get('grant_role'))
-    ) %}
-  {% endif %}
 {% endfor %}
 
-{{ return((schema_statements + service_statements) | join('\n')) }}
+{{ return(statements | join('\n')) }}
 {% endif %}
 {% endmacro %}
