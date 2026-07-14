@@ -100,7 +100,7 @@
 
     {% set create_sql %}
       CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
-        '{{ _q_db }}.{{ _q_sch }}.{{ _q_vn }}',
+        '{{ _q_db }}.{{ _q_sch }}',
         $$
 {{ safe_yaml }}
         $$
