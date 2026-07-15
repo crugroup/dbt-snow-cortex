@@ -59,7 +59,7 @@
                     primary_key_columns=['ID_COL'],
                     attribute_columns=['FILTER_COL'],
                     source_query_casts={'DATE_COL': 'VARCHAR'},
-                    warehouse='WAREHOUSE__DBT',
+  warehouse='COMPUTE_WH',
                                           target_lag='1 hour',
                                           refresh_mode='INCREMENTAL') }}"
   #}
@@ -204,7 +204,7 @@
       attribute_columns=config.get('attribute_columns', []),
       source_query=config.get('source_query'),
       source_query_casts=config.get('source_query_casts', {}),
-      warehouse=config.get('warehouse', 'WAREHOUSE__DBT'),
+      warehouse=config.get('warehouse', 'COMPUTE_WH'),
       target_lag=config.get('target_lag', '1 hour'),
       refresh_mode=config.get('refresh_mode', 'INCREMENTAL')
     )
