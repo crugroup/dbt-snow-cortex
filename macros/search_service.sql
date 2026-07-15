@@ -5,7 +5,7 @@
   attribute_columns=none,
   source_query=none,
   source_query_casts=none,
-  warehouse='COMPUTE_WH',
+  warehouse='WAREHOUSE__ORAC',
   target_lag='1 hour',
   refresh_mode='INCREMENTAL'
 ) %}
@@ -204,7 +204,7 @@
       attribute_columns=config.get('attribute_columns', []),
       source_query=config.get('source_query'),
       source_query_casts=config.get('source_query_casts', {}),
-      warehouse=config.get('warehouse', 'COMPUTE_WH'),
+      warehouse=config.get('warehouse', 'WAREHOUSE__ORAC'),
       target_lag=config.get('target_lag', '1 hour'),
       refresh_mode=config.get('refresh_mode', 'INCREMENTAL')
     )
