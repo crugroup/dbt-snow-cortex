@@ -157,14 +157,19 @@
             - "{{ dbt_snow_cortex.apply_cortex_search_config() }}"
   #}
 {% if execute %}
-{% set node = graph.nodes.get(this.unique_id) %}
+{% set this_id = this.unique_id %}
+{% do log('dbt_snow_cortex.apply_cortex_search_config: invoked for ' ~ this_id, info=true) %}
+{% set node = graph.nodes.get(this_id) %}
 {% if node is none %}
+  {% do log('dbt_snow_cortex.apply_cortex_search_config: node not found in graph for ' ~ this_id, info=true) %}
   {% do return('') %}
 {% endif %}
 {% set cs = node.config.meta.get('cortex_search') %}
 {% if cs is none %}
+  {% do log('dbt_snow_cortex.apply_cortex_search_config: no cortex_search meta config for ' ~ this_id, info=true) %}
   {% do return('') %}
 {% endif %}
+{% do log('dbt_snow_cortex.apply_cortex_search_config: found cortex_search config for ' ~ this_id, info=true) %}
 
 {# Normalise single dict or list to list #}
 {% if cs is mapping %}
@@ -174,6 +179,8 @@
 {% endif %}
 
 {% set statements = [] %}
+
+{% do log('dbt_snow_cortex.apply_cortex_search_config: creating ' ~ configs | length ~ ' search service(s) for ' ~ this_id, info=true) %}
 
 {% for config in configs %}
   {% set _database = config.get('database', this.database) %}
