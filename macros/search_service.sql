@@ -194,7 +194,7 @@
   {% set _q_name = adapter.quote(_service_name) %}
   {% set _full_name = _q_db ~ '.' ~ _q_sch ~ '.' ~ _q_name %}
 
-  {% do statements.append('CREATE SCHEMA IF NOT EXISTS ' ~ _q_db ~ '.' ~ _q_sch) %}
+  {% do run_query('CREATE SCHEMA IF NOT EXISTS ' ~ _q_db ~ '.' ~ _q_sch) %}
 
   {% do statements.append(
     dbt_snow_cortex.create_cortex_search_service(
@@ -211,6 +211,6 @@
   ) %}
 {% endfor %}
 
-{{ return('BEGIN\n' ~ (statements | join(';\n')) ~ ';\nEND;') }}
+{{ return(statements | first) }}
 {% endif %}
 {% endmacro %}
