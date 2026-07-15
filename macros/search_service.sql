@@ -211,6 +211,6 @@
   ) %}
 {% endfor %}
 
-{{ return(statements | join('\n')) }}
+{{ return('BEGIN\n' ~ (statements | join(';\n')) ~ ';\nEND;') }}
 {% endif %}
 {% endmacro %}
