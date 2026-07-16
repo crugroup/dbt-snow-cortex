@@ -81,21 +81,22 @@
     When source_query is provided it is used verbatim (supports LATERAL, UNION, subqueries, etc.).
     Otherwise introspect the model relation and build SELECT <cols> FROM {{ this }}.
   #}
-{% if source_query is not none %}
+  {% if source_query is not none %}
     {% set _as_clause = source_query %}
   {% else %}
-{% set _source_columns = [] %}
-{% for col in adapter.get_columns_in_relation(this) %}
-{% if col.name in _casts %}
+    {% set _referenced_cols = ([search_column] + _primary_keys + _attributes) | unique | list %}
+    {% set _source_columns = [] %}
+    {% for col_name in _referenced_cols %}
+      {% if col_name in _casts %}
         {% do _source_columns.append(
-          'CAST(' ~ adapter.quote(col.name) ~ ' AS ' ~ _casts[col.name] ~ ') AS ' ~ adapter.quote(col.name)
+          'CAST(' ~ adapter.quote(col_name) ~ ' AS ' ~ _casts[col_name] ~ ') AS ' ~ adapter.quote(col_name)
         ) %}
       {% else %}
-        {% do _source_columns.append(adapter.quote(col.name)) %}
+        {% do _source_columns.append(adapter.quote(col_name)) %}
       {% endif %}
     {% endfor %}
     {% set _as_clause %}
-      SELECT {{ _source_columns | join(', ') }}
+      SELECT DISTINCT {{ _source_columns | join(', ') }}
       FROM {{ this }}
     {% endset %}
   {% endif %}
