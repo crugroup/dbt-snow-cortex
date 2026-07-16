@@ -59,7 +59,7 @@
                     primary_key_columns=['ID_COL'],
                     attribute_columns=['FILTER_COL'],
                     source_query_casts={'DATE_COL': 'VARCHAR'},
-                    warehouse='WAREHOUSE__DBT',
+                    warehouse='COMPUTE_WH',
                                           target_lag='1 hour',
                                           refresh_mode='INCREMENTAL') }}"
   #}
@@ -81,21 +81,22 @@
     When source_query is provided it is used verbatim (supports LATERAL, UNION, subqueries, etc.).
     Otherwise introspect the model relation and build SELECT <cols> FROM {{ this }}.
   #}
-{% if source_query is not none %}
+  {% if source_query is not none %}
     {% set _as_clause = source_query %}
   {% else %}
-{% set _source_columns = [] %}
-{% for col in adapter.get_columns_in_relation(this) %}
-{% if col.name in _casts %}
+    {% set _referenced_cols = ([search_column] + _primary_keys + _attributes) | unique | list %}
+    {% set _source_columns = [] %}
+    {% for col_name in _referenced_cols %}
+      {% if col_name in _casts %}
         {% do _source_columns.append(
-          'CAST(' ~ adapter.quote(col.name) ~ ' AS ' ~ _casts[col.name] ~ ') AS ' ~ adapter.quote(col.name)
+          'CAST(' ~ adapter.quote(col_name) ~ ' AS ' ~ _casts[col_name] ~ ') AS ' ~ adapter.quote(col_name)
         ) %}
       {% else %}
-        {% do _source_columns.append(adapter.quote(col.name)) %}
+        {% do _source_columns.append(adapter.quote(col_name)) %}
       {% endif %}
     {% endfor %}
     {% set _as_clause %}
-      SELECT {{ _source_columns | join(', ') }}
+      SELECT DISTINCT {{ _source_columns | join(', ') }}
       FROM {{ this }}
     {% endset %}
   {% endif %}
@@ -157,14 +158,19 @@
             - "{{ dbt_snow_cortex.apply_cortex_search_config() }}"
   #}
 {% if execute %}
-{% set node = graph.nodes.get(this.unique_id) %}
-{% if node is none %}
-  {% do return('') %}
+{% set cs = config.get('meta', {}).get('cortex_search') %}
+{% if cs is none and this.unique_id %}
+  {% set node = graph.nodes.get(this.unique_id) %}
+  {% if node is not none %}
+    {% set cs = node.config.meta.get('cortex_search') %}
+  {% endif %}
 {% endif %}
-{% set cs = node.config.meta.get('cortex_search') %}
 {% if cs is none %}
+  {% do log('dbt_snow_cortex.apply_cortex_search_config: no cortex_search meta config for ' ~ this.unique_id, info=true) %}
   {% do return('') %}
 {% endif %}
+
+{% do log('dbt_snow_cortex.apply_cortex_search_config: found cortex_search config for ' ~ this.unique_id, info=true) %}
 
 {# Normalise single dict or list to list #}
 {% if cs is mapping %}
@@ -187,7 +193,9 @@
   {% set _q_name = adapter.quote(_service_name) %}
   {% set _full_name = _q_db ~ '.' ~ _q_sch ~ '.' ~ _q_name %}
 
-  {% do statements.append('CREATE SCHEMA IF NOT EXISTS ' ~ _q_db ~ '.' ~ _q_sch) %}
+  {% do run_query('CREATE SCHEMA IF NOT EXISTS ' ~ _q_db ~ '.' ~ _q_sch) %}
+
+  {% do log('dbt_snow_cortex.apply_cortex_search_config: creating search service ' ~ _full_name ~ ' for ' ~ this.unique_id, info=true) %}
 
   {% do statements.append(
     dbt_snow_cortex.create_cortex_search_service(
@@ -204,6 +212,6 @@
   ) %}
 {% endfor %}
 
-{{ return(statements | join('\n')) }}
+{{ return(statements | first) }}
 {% endif %}
 {% endmacro %}
