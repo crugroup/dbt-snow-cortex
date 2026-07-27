@@ -212,6 +212,6 @@
   ) %}
 {% endfor %}
 
-{{ return(statements | first) }}
+{{ return(statements | join(';\n')) }}
 {% endif %}
 {% endmacro %}
