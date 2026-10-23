@@ -234,6 +234,16 @@ triggers a rebuild. Re-apply grants in a later post-hook so they survive a rebui
 | `database` | No | `target.database` | Target database |
 | `schema` | No | `CORTEX_ANALYST` | Target schema |
 | `replace` | No | `true` | If false, existing view is left unchanged |
+| `create_mode` | No | `on_change` | `on_change`: skip when the view's YAML is unchanged (see below). `replace`: recreate on every run |
+
+#### `create_mode: on_change`
+
+With the default `create_mode: on_change` the macro fingerprints the view (MD5 over the
+fully-qualified name and the YAML), appends it to the view `COMMENT` as
+`[dbt_snow_cortex:def_md5=<hash>]` after the YAML `description`, and on later runs skips the
+`CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML` when the existing view carries the same hash. Views
+created before this marker existed are recreated once on the next run, then skipped while
+unchanged. Pass `create_mode='replace'` to recreate on every run.
 
 ## Integration Tests
 
