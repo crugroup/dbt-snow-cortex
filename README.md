@@ -83,6 +83,8 @@ models:
             primary_key_columns: [RECORD_ID, EVENT_DATE]
             attribute_columns: [COUNTRY, CATEGORY]
             source_query_casts: {EVENT_DATE: VARCHAR}
+            embedding_model: snowflake-arctic-embed-l-v2.0
+            create_mode: on_change
           - service_name: CSS_PRODUCT_META
             search_column: PRODUCT_NAME
             attribute_columns: [CATEGORY, PRICE_BAND]
@@ -108,7 +110,9 @@ models:
                 source_query_casts={'EVENT_DATE': 'VARCHAR'},
                 warehouse='COMPUTE_WH',
                 target_lag='1 hour',
-                refresh_mode='INCREMENTAL') }}"
+                refresh_mode='INCREMENTAL',
+                embedding_model='snowflake-arctic-embed-l-v2.0',
+                create_mode='on_change') }}"
 ```
 
 ### 3) Semantic view deployment from YAML (run-operation)
@@ -207,6 +211,18 @@ dbt run-operation dbt_snow_cortex.assert_cortex_deployment \
 | `warehouse` | No | `COMPUTE_WH` | Build/refresh warehouse |
 | `target_lag` | No | `1 hour` | Staleness target |
 | `refresh_mode` | No | `INCREMENTAL` | `INCREMENTAL` or `FULL` |
+| `embedding_model` | No | `snowflake-arctic-embed-m-v1.5` | Cortex embedding model, e.g. `snowflake-arctic-embed-l-v2.0`; `none` omits `EMBEDDING_MODEL` from the DDL |
+| `create_mode` | No | `replace` | `replace`: `CREATE OR REPLACE` on every run. `on_change`: skip when the service's definition is unchanged (see below) |
+
+#### `create_mode: on_change`
+
+`CREATE OR REPLACE` rebuilds the service from scratch, re-embedding every row and dropping its
+grants. With `create_mode: on_change` the macro fingerprints the rendered definition (MD5 over
+the name, `ON`/`PRIMARY KEY`/`ATTRIBUTES`/warehouse/lag/model/refresh clauses and the source
+query), stores it in the service `COMMENT` as `dbt_snow_cortex:def_md5=<hash>`, and on later runs
+returns no SQL when the existing service carries the same hash. Row changes in the source are
+then picked up by the service's own incremental refresh (`TARGET_LAG`); only a definition change
+triggers a rebuild. Re-apply grants in a later post-hook so they survive a rebuild.
 
 ### `create_or_replace_semantic_view`
 
