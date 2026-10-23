@@ -217,7 +217,10 @@
 {% endif %}
 {% endif %}
 {% if cs is none %}
-{% do log('dbt_snow_cortex.apply_cortex_search_config: no cortex_search meta config for ' ~ this.unique_id, info=true) %}
+{% do log(
+  'dbt_snow_cortex.apply_cortex_search_config: no cortex_search meta config for ' ~ this.unique_id,
+  info=true
+) %}
 {% do return('') %}
 {% endif %}
 
@@ -246,7 +249,10 @@
 
 {% do run_query('CREATE SCHEMA IF NOT EXISTS ' ~ _q_db ~ '.' ~ _q_sch) %}
 
-{% do log('dbt_snow_cortex.apply_cortex_search_config: applying search service ' ~ _full_name ~ ' for ' ~ this.unique_id, info=true) %}
+{% do log(
+  'dbt_snow_cortex.apply_cortex_search_config: applying search service ' ~ _full_name ~ ' for ' ~ this.unique_id,
+  info=true
+) %}
 
   {% set statement = dbt_snow_cortex.create_cortex_search_service(
       service_name=_full_name,
