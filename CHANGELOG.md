@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-10-23
+
+- `create_cortex_search_service` / `apply_cortex_search_config`: new `embedding_model` parameter (default `snowflake-arctic-embed-m-v1.5`, Snowflake's own default), emitted as `EMBEDDING_MODEL = '<model>'`; `none` omits it.
+- `create_cortex_search_service` / `apply_cortex_search_config`: new `create_mode` parameter. `replace` (default) keeps today's `CREATE OR REPLACE` on every run; `on_change` skips the statement when the existing service was created from the same definition, so dbt runs no longer rebuild and re-embed the whole index.
+- The generated DDL now sets `COMMENT = 'dbt_snow_cortex:def_md5=<hash>'` in both modes.
+- `apply_cortex_search_config`: skipped services no longer leave empty statements in the post-hook SQL.
+
 ## 0.2.3 — 2026-07-14
 
 - `create_or_replace_semantic_view`: fix first argument to `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML` — pass 2-part schema name (`db.schema`) instead of 3-part view name (`db.schema.view_name`). The view name is derived from the YAML `name:` field. This fixes Snowflake error 392408 (Unexpected number of qualifiers).

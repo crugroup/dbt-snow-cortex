@@ -11,6 +11,12 @@ models:
             primary_key_columns: [ID]
             attribute_columns: [COMMODITY_NAME, DATA_DATE]
             source_query_casts: {DATA_DATE: VARCHAR}
+          - service_name: CSS_SAMPLE_SEARCH_ON_CHANGE
+            search_column: DESCRIPTION
+            primary_key_columns: [ID]
+            attribute_columns: [COMMODITY_NAME, DATA_DATE]
+            embedding_model: snowflake-arctic-embed-l-v2.0
+            create_mode: on_change
       post_hook:
         - "{{ dbt_snow_cortex.apply_cortex_search_config() }}"
     columns:
