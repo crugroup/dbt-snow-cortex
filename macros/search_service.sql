@@ -9,7 +9,7 @@
   target_lag='1 hour',
   refresh_mode='INCREMENTAL',
   embedding_model='snowflake-arctic-embed-m-v1.5',
-  create_mode='replace'
+  create_mode='on_change'
 ) %}
   {{ return(adapter.dispatch('create_cortex_search_service', 'dbt_snow_cortex')(
     service_name=service_name,
@@ -57,11 +57,11 @@
         refresh_mode:         INCREMENTAL (default) or FULL.
         embedding_model:      Cortex embedding model. Default 'snowflake-arctic-embed-m-v1.5';
                               pass none to omit EMBEDDING_MODEL from the DDL.
-        create_mode:          'replace' (default): CREATE OR REPLACE on every run.
-                              'on_change': skip when the existing service was created from
-                              the same definition (MD5 of the DDL, kept in the service COMMENT),
-                              so row changes are left to the service's own refresh instead of
-                              a full rebuild and re-embedding.
+        create_mode:          'on_change' (default): skip when the existing service was created
+                              from the same definition (MD5 of the DDL, kept in the service
+                              COMMENT), so row changes are left to the service's own refresh
+                              instead of a full rebuild and re-embedding.
+                              'replace': CREATE OR REPLACE on every run.
 
     Usage in model YAML config:
         config:
@@ -265,7 +265,7 @@
       target_lag=config.get('target_lag', '1 hour'),
       refresh_mode=config.get('refresh_mode', 'INCREMENTAL'),
       embedding_model=config.get('embedding_model', 'snowflake-arctic-embed-m-v1.5'),
-      create_mode=config.get('create_mode', 'replace')
+      create_mode=config.get('create_mode', 'on_change')
   ) %}
 {# on_change returns nothing for an unchanged service; keep it out of the joined hook SQL #}
 {% if statement | trim | length > 0 %}
