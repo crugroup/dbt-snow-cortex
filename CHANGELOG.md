@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 — 2026-10-26
+
+- `create_cortex_search_service` / `apply_cortex_search_config`: `create_mode` now defaults to `on_change`, matching `create_or_replace_semantic_view`. Services created by 0.3.0+ already carry the definition hash and are skipped while unchanged; older services are rebuilt once. Pass `create_mode='replace'` to rebuild on every run as before.
+
 ## 0.4.0 — 2026-10-23
 
 - `create_or_replace_semantic_view`: new `create_mode` parameter, defaulting to `on_change`: the view is only recreated when its YAML changes, tracked by a `[dbt_snow_cortex:def_md5=<hash>]` marker appended to the view `COMMENT`. Existing views are recreated once on the first run after upgrading. Pass `create_mode='replace'` to recreate on every run as before.
