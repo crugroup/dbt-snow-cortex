@@ -15,6 +15,7 @@ models:
             search_column: DESCRIPTION
             primary_key_columns: [ID]
             attribute_columns: [COMMODITY_NAME, DATA_DATE]
+            other_columns: [SOURCE_URL]
             embedding_model: snowflake-arctic-embed-l-v2.0
             create_mode: on_change
       post_hook:
@@ -28,3 +29,5 @@ models:
         description: Filterable attribute — commodity the description relates to.
       - name: data_date
         description: Date of the record.
+      - name: source_url
+        description: Returned in search results via other_columns; not searched or filterable.

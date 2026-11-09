@@ -9,8 +9,7 @@ Prerequisites:
 - dbt Core / dbt Snowflake (same versions supported by this repo)
 - A Snowflake account + role that can:
   - `CREATE OR REPLACE CORTEX SEARCH SERVICE`
-  - Execute `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML`
-  - Read `INFORMATION_SCHEMA.CORTEX_SEARCH_SERVICES` and `INFORMATION_SCHEMA.SEMANTIC_VIEWS`
+  - Read `INFORMATION_SCHEMA.CORTEX_SEARCH_SERVICES`
 
 Clone and create a branch:
 
@@ -35,13 +34,10 @@ dbt deps
 dbt run
 ```
 
-3. Inspect created services and views:
+3. Inspect created services:
 
 ```bash
 dbt run-operation dbt_snow_cortex.list_cortex_search_services \
-  --args '{database: YOUR_DATABASE}'
-
-dbt run-operation dbt_snow_cortex.list_semantic_views \
   --args '{database: YOUR_DATABASE}'
 ```
 

@@ -9,7 +9,7 @@ integration_tests:
       account: YOUR_SNOWFLAKE_ACCOUNT  # e.g. abc12345.us-east-1
       user: YOUR_USERNAME
       password: YOUR_PASSWORD
-      role: YOUR_ROLE                  # needs CREATE CORTEX SEARCH SERVICE + semantic view procedure rights
+      role: YOUR_ROLE                  # needs CREATE CORTEX SEARCH SERVICE rights
       database: YOUR_DATABASE
       warehouse: YOUR_WAREHOUSE
       schema: dbt_snow_cortex_tests
