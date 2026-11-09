@@ -1,20 +1,3 @@
-[build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "dbt-snow-cortex-hooks"
-version = "0.1.0"
-description = "Pre-commit hook support files for dbt-snow-cortex"
-requires-python = ">=3.9"
-
-[project.scripts]
-semantic-view-yaml-sync = "sync_semantic_view_yaml:main"
-
-[tool.setuptools]
-packages = []
-py-modules = ["sync_semantic_view_yaml"]
-
 [tool.sqlfluff.core]
 dialect = "snowflake"
 max_line_length = 120

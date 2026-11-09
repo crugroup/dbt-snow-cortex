@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0 — 2026-11-09
+
+- **Breaking:** semantic view support removed; the package now manages Cortex Search Services only. Removed `create_or_replace_semantic_view`, `list_semantic_views`, `get_semantic_views`, the `expected_semantic_views` argument of `collect_cortex_deployment_status` / `log_cortex_deployment_summary` / `assert_cortex_deployment` (and the `*_semantic_views` keys of the returned status), and the `semantic-view-yaml-sync` pre-commit hook.
+- `create_cortex_search_service` / `apply_cortex_search_config`: new `other_columns` parameter (default `[]`) for columns included in the auto-built source query, and so returnable in search results, without being the search column or `ATTRIBUTES`. `source_query_casts` applies to them; ignored when `source_query` is given. Existing services without `other_columns` keep their definition hash and are not rebuilt.
+
 ## 0.4.1 — 2026-10-26
 
 - `create_cortex_search_service` / `apply_cortex_search_config`: `create_mode` now defaults to `on_change`, matching `create_or_replace_semantic_view`. Services created by 0.3.0+ already carry the definition hash and are skipped while unchanged; older services are rebuilt once. Pass `create_mode='replace'` to rebuild on every run as before.

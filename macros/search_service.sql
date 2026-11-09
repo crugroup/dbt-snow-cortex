@@ -3,6 +3,7 @@
   search_column=none,
   primary_key_columns=none,
   attribute_columns=none,
+  other_columns=none,
   source_query=none,
   source_query_casts=none,
   warehouse='COMPUTE_WH',
@@ -16,6 +17,7 @@
     search_column=search_column,
     primary_key_columns=primary_key_columns,
     attribute_columns=attribute_columns,
+    other_columns=other_columns,
     source_query=source_query,
     source_query_casts=source_query_casts,
     warehouse=warehouse,
@@ -32,6 +34,7 @@
   search_column,
   primary_key_columns,
   attribute_columns,
+  other_columns,
   source_query,
   source_query_casts,
   warehouse,
@@ -50,6 +53,9 @@
         search_column:        VARCHAR column to full-text index (ON clause). Required.
         primary_key_columns:  List of columns for incremental refresh PRIMARY KEY clause.
         attribute_columns:    List of VARCHAR/NUMBER columns exposed as filterable ATTRIBUTES.
+        other_columns:        List of extra columns included in the source query (returnable in
+                              search results) that are neither the search column nor ATTRIBUTES.
+                              Ignored when source_query is given.
         source_query_casts:   Dict of {column_name: sql_type} to cast in the AS SELECT,
                               e.g. {'DATA_DATE': 'VARCHAR'}.
         warehouse:            Virtual warehouse used to build and refresh the service.
@@ -71,6 +77,7 @@
                     search_column='MY_TEXT_COL',
                     primary_key_columns=['ID_COL'],
                     attribute_columns=['FILTER_COL'],
+                    other_columns=['URL_COL'],
                     source_query_casts={'DATE_COL': 'VARCHAR'},
                     warehouse='COMPUTE_WH',
                     target_lag='1 hour',
@@ -95,6 +102,7 @@
 
 {% set _primary_keys = primary_key_columns if primary_key_columns is not none else [] %}
 {% set _attributes = attribute_columns if attribute_columns is not none else [] %}
+{% set _others = other_columns if other_columns is not none else [] %}
 {% set _casts = source_query_casts if source_query_casts is not none else {} %}
 
   {#
@@ -105,7 +113,7 @@
 {% if source_query is not none %}
     {% set _as_clause = source_query %}
   {% else %}
-{% set _referenced_cols = ([search_column] + _primary_keys + _attributes) | unique | list %}
+{% set _referenced_cols = ([search_column] + _primary_keys + _attributes + _others) | unique | list %}
 {% set _source_columns = [] %}
 {% for col_name in _referenced_cols %}
 {% if col_name in _casts %}
@@ -190,7 +198,7 @@
       database:        Target database (default: target.database).
       schema:          Target schema (default: target.schema).
       search_column:   Column to full-text index (required).
-      attribute_columns, source_query, source_query_casts, warehouse,
+      attribute_columns, other_columns, source_query, source_query_casts, warehouse,
       target_lag, refresh_mode, embedding_model, create_mode:
                        see create_cortex_search_service.
 
@@ -259,6 +267,7 @@
       search_column=config.get('search_column'),
       primary_key_columns=config.get('primary_key_columns', []),
       attribute_columns=config.get('attribute_columns', []),
+      other_columns=config.get('other_columns', []),
       source_query=config.get('source_query'),
       source_query_casts=config.get('source_query_casts', {}),
       warehouse=config.get('warehouse', 'COMPUTE_WH'),
