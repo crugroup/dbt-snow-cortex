@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1 — 2026-11-09
+
+- `create_cortex_search_service` / `apply_cortex_search_config`: new `distinct` parameter, default `false`. The auto-built source query no longer uses `SELECT DISTINCT` unless `distinct=true`. This changes the definition hash, so existing services built from the auto-built query are rebuilt once on the next run; pass `distinct=true` to keep the old query and hash. Services using `source_query` are unaffected.
+
 ## 0.5.0 — 2026-11-09
 
 - **Breaking:** semantic view support removed; the package now manages Cortex Search Services only. Removed `create_or_replace_semantic_view`, `list_semantic_views`, `get_semantic_views`, the `expected_semantic_views` argument of `collect_cortex_deployment_status` / `log_cortex_deployment_summary` / `assert_cortex_deployment` (and the `*_semantic_views` keys of the returned status), and the `semantic-view-yaml-sync` pre-commit hook.

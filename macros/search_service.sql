@@ -6,6 +6,7 @@
   other_columns=none,
   source_query=none,
   source_query_casts=none,
+  distinct=false,
   warehouse='COMPUTE_WH',
   target_lag='1 hour',
   refresh_mode='INCREMENTAL',
@@ -20,6 +21,7 @@
     other_columns=other_columns,
     source_query=source_query,
     source_query_casts=source_query_casts,
+    distinct=distinct,
     warehouse=warehouse,
     target_lag=target_lag,
     refresh_mode=refresh_mode,
@@ -37,6 +39,7 @@
   other_columns,
   source_query,
   source_query_casts,
+  distinct,
   warehouse,
   target_lag,
   refresh_mode,
@@ -58,6 +61,8 @@
                               Ignored when source_query is given.
         source_query_casts:   Dict of {column_name: sql_type} to cast in the AS SELECT,
                               e.g. {'DATA_DATE': 'VARCHAR'}.
+        distinct:             Emit SELECT DISTINCT in the auto-built source query. Default false.
+                              Ignored when source_query is given.
         warehouse:            Virtual warehouse used to build and refresh the service.
         target_lag:           Acceptable staleness, e.g. '1 hour', '30 minutes'.
         refresh_mode:         INCREMENTAL (default) or FULL.
@@ -79,6 +84,7 @@
                     attribute_columns=['FILTER_COL'],
                     other_columns=['URL_COL'],
                     source_query_casts={'DATE_COL': 'VARCHAR'},
+                    distinct=false,
                     warehouse='COMPUTE_WH',
                     target_lag='1 hour',
                     refresh_mode='INCREMENTAL',
@@ -125,7 +131,7 @@
       {% endif %}
     {% endfor %}
     {% set _as_clause %}
-      SELECT DISTINCT {{ _source_columns | join(', ') }}
+      SELECT {{ 'DISTINCT ' if distinct else '' }}{{ _source_columns | join(', ') }}
       FROM {{ this }}
     {% endset %}
   {% endif %}
@@ -198,7 +204,7 @@
       database:        Target database (default: target.database).
       schema:          Target schema (default: target.schema).
       search_column:   Column to full-text index (required).
-      attribute_columns, other_columns, source_query, source_query_casts, warehouse,
+      attribute_columns, other_columns, source_query, source_query_casts, distinct, warehouse,
       target_lag, refresh_mode, embedding_model, create_mode:
                        see create_cortex_search_service.
 
@@ -270,6 +276,7 @@
       other_columns=config.get('other_columns', []),
       source_query=config.get('source_query'),
       source_query_casts=config.get('source_query_casts', {}),
+      distinct=config.get('distinct', false),
       warehouse=config.get('warehouse', 'COMPUTE_WH'),
       target_lag=config.get('target_lag', '1 hour'),
       refresh_mode=config.get('refresh_mode', 'INCREMENTAL'),
