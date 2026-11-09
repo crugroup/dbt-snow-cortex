@@ -157,6 +157,7 @@ dbt run-operation dbt_snow_cortex.assert_cortex_deployment \
 | `other_columns` | No | `[]` | Extra columns returned in search results but neither searched nor filterable. Added to the auto-built source query (casts apply); ignored when `source_query` is given |
 | `source_query` | No | auto-built from relation | Use custom SQL when you need unions/lateral/subqueries |
 | `source_query_casts` | No | `{}` | Column cast map when using auto-built source query |
+| `distinct` | No | `false` | `true` emits `SELECT DISTINCT` in the auto-built source query; ignored when `source_query` is given |
 | `warehouse` | No | `COMPUTE_WH` | Build/refresh warehouse |
 | `target_lag` | No | `1 hour` | Staleness target |
 | `refresh_mode` | No | `INCREMENTAL` | `INCREMENTAL` or `FULL` |
